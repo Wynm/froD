@@ -6,7 +6,8 @@ import { World } from './game/world.js';
 import { generateLevel } from './game/level.js';
 import { Meta } from './game/meta.js';
 import { W, H, CELL } from './game/constants.js';
-import { todayKey } from './core/rng.js';
+import { todayKey, mulberry32 } from './core/rng.js';
+import { decide } from './game/autopilot.js';
 import { setLang, getLang, detectLang, t, applyDOM, onLangChange } from './core/i18n.js';
 import { AudioEngine } from './core/audio.js';
 import { Input } from './core/input.js';
@@ -28,11 +29,12 @@ const hud = new HUD(frogURL);
 const input = new Input(canvas, document.getElementById('dpad'));
 input.attach();
 
-let attract = makeAttract();
-function makeAttract() {
-  const w = new World(generateLevel(1, (Math.random() * 1e9) >>> 0));
-  w.attract = true;
-  return w;
+// Attract mode: a real autopilot frog plays level 1 behind the menu.
+let demo = makeDemo();
+let demoAge = 0;
+function makeDemo() {
+  const seed = (Math.random() * 1e9) >>> 0;
+  return new World(generateLevel(1, seed), mulberry32(seed));
 }
 
 // ---- settings ---------------------------------------------------------------
@@ -70,7 +72,7 @@ const screens = new Screens(document.getElementById('screens'), meta, {
   play: (mode) => { audio.unlock(); game.start(mode); },
   resume: () => game.resume(),
   restart: () => game.start(game.mode),
-  quit: () => { game.toMenu(); attract = makeAttract(); showMenu(); },
+  quit: () => { game.toMenu(); demo = makeDemo(); demoAge = 0; showMenu(); },
   settings: (partial) => { Object.assign(meta.settings, partial); meta.save(); applySettings(); },
   setLang: (l) => { meta.settings.lang = l; meta.save(); setLang(l); },
   resetData: () => {
@@ -100,6 +102,9 @@ screens.lastData = {};
 
 function showMenu() {
   hud.setVisible(false);
+  renderer.setTheme(demo.cfg.theme);
+  audio.setMood(demo.cfg.theme);
+  audio.setPaused(false);
   screens.show('menu');
   updateTouchpad();
 }
@@ -115,6 +120,7 @@ function checkAchievements() {
 
 // ---- game events → audio / FX / HUD / meta -----------------------------------------
 const px = (c) => c * CELL + 8;
+function buzz(pattern) { try { navigator.vibrate?.(pattern); } catch { /* unsupported */ } }
 game.events.on('start', () => {
   screens.hideAll();
   hud.setVisible(true);
@@ -144,6 +150,7 @@ game.events.on('hop', () => {
 });
 game.events.on('death', ({ cause, x, y }) => {
   meta.recordDeath(cause);
+  buzz(70);
   if (cause === 'car') { audio.play('hit'); fx.hit(px(x), px(y)); }
   else if (cause === 'water') { audio.play('splash'); fx.splash(px(x), px(y)); }
   else if (cause === 'edge') { audio.play('splash'); fx.splash(px(x), px(y)); }
@@ -153,6 +160,7 @@ game.events.on('death', ({ cause, x, y }) => {
 });
 game.events.on('home', ({ bayX, fly }) => {
   audio.play('home');
+  buzz([20, 30, 20]);
   if (fly) { audio.play('fly'); meta.bump('flies'); screens.toast(t('toast.fly')); }
   meta.bump('homes');
   fx.confetti(px(bayX), px(0));
@@ -179,7 +187,7 @@ game.events.on('shieldBreak', ({ x, y }) => {
   fx.shake(2);
   screens.toast(t('toast.shieldBreak'));
 });
-game.events.on('extraLife', () => { audio.play('extraLife'); screens.toast(t('toast.extraLife'), { gold: true }); });
+game.events.on('extraLife', () => { audio.play('extraLife'); buzz([30, 50, 30]); screens.toast(t('toast.extraLife'), { gold: true }); });
 game.events.on('tick', () => audio.play('tick'));
 game.events.on('crossRoad', () => { meta.bump('roadCrossings'); });
 game.events.on('pause', () => { audio.setPaused(true); screens.show('pause'); updateTouchpad(); });
@@ -221,6 +229,12 @@ input.events.on('confirm', () => {
   else if (screens.current === 'menu') { audio.unlock(); game.start('classic'); }
 });
 
+document.getElementById('btn-pause').addEventListener('click', () => {
+  audio.unlock();
+  if (game.paused) game.resume();
+  else if (game.state === 'playing') game.pause();
+});
+
 document.addEventListener('visibilitychange', () => { if (document.hidden) game.pause(); });
 
 // ---- main loop ------------------------------------------------------------------------
@@ -230,7 +244,13 @@ let acc = 0;
 
 function tick(dt) {
   if (game.state === 'menu') {
-    attract.update(dt);
+    demoAge += dt;
+    const dir = decide(demo);
+    if (dir) demo.hop(dir);
+    demo.update(dt);
+    if (demo.frog.dead && demo.frog.deathT > 1.1) demo.respawn();
+    else if (demo.frog.scored) demo.respawn();
+    if (demo.baysFilled >= 5 || demoAge > 30) { demo = makeDemo(); demoAge = 0; }
   } else if (game.state === 'over' || game.state === 'dailyComplete') {
     // freeze the final frame behind the result screen
   } else {
@@ -249,7 +269,7 @@ function tick(dt) {
 }
 
 function render(tSec) {
-  const world = game.state === 'menu' ? attract : game.world;
+  const world = game.state === 'menu' ? demo : game.world;
   if (world) renderer.draw(world, game, fx, tSec);
   if (game.world && ['playing', 'dying', 'scored', 'clear'].includes(game.state)) {
     hud.setTime(game.world.timeLeft / game.world.cfg.timeLimit);
