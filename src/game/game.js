@@ -25,6 +25,7 @@ export class Game {
     this.deathsThisLevel = 0;
     this.lastCause = null;
     this.dailyDate = todayKey();
+    this.combo = 0;          // consecutive homes without a death
   }
 
   start(mode = 'classic') {
@@ -38,6 +39,7 @@ export class Game {
     this.level = 1;
     this.nextExtra = EXTRA_LIFE_EVERY;
     this.deathsThisLevel = 0;
+    this.combo = 0;
     this.paused = false;
     this.loadLevel();
     this.setState('playing');
@@ -95,15 +97,20 @@ export class Game {
       case 'death':
         this.deathsThisLevel++;
         this.lastCause = data.cause;
+        if (this.combo > 0) { this.combo = 0; this.events.emit('combo', { mult: 1, combo: 0 }); }
         this.lives--;
         this.events.emit('lives', { lives: this.lives });
         this.events.emit('death', data);
         this.setState('dying');
         break;
       case 'home': {
-        const bonus = SCORE.HOME + Math.ceil(data.timeLeft) * SCORE.TIME_BONUS + (data.fly ? SCORE.FLY : 0);
+        this.combo++;
+        const mult = Math.min(5, this.combo);   // 1st home ×1, 2nd ×2, … capped ×5
+        const base = SCORE.HOME + Math.ceil(data.timeLeft) * SCORE.TIME_BONUS + (data.fly ? SCORE.FLY : 0);
+        const bonus = base * mult;
         this.addScore(bonus);
-        this.events.emit('home', { ...data, bonus });
+        this.events.emit('home', { ...data, bonus, mult });
+        if (mult >= 2) this.events.emit('combo', { mult, combo: this.combo });
         if (this.world.baysFilled >= this.world.bays.length) {
           this.addScore(SCORE.CLEAR);
           this.events.emit('clear', { level: this.level, flawless: this.deathsThisLevel === 0 });

@@ -5,7 +5,7 @@
 **لعبة أركيد حديثة: ساعد الضفدع على عبور الطريق والنهر**
 *A modern frog-crossing arcade game — pure web platform, zero dependencies.*
 
-[![tests](https://img.shields.io/badge/tests-48%20passing-3fae49)](#-الاختبارات--testing)
+[![tests](https://img.shields.io/badge/tests-52%20passing-3fae49)](#-الاختبارات--testing)
 [![deps](https://img.shields.io/badge/dependencies-0-7fd487)](#)
 [![i18n](https://img.shields.io/badge/i18n-العربية%20%7C%20English-ffd23e)](#)
 [![PWA](https://img.shields.io/badge/PWA-offline%20ready-2a6db5)](#)
@@ -49,7 +49,7 @@ node server.mjs        # أو: npm start
 
 ### الاختبارات
 ```bash
-npm test               # 48 اختبارًا: المنطق، المستويات، الذكاء الآلي، تكامل التشغيل
+npm test               # 52 اختبارًا: المنطق، المستويات، الذكاء الآلي، تكامل التشغيل
 npm run check          # فحص صياغة كل الوحدات
 npm run icons          # توليد أيقونات PWA
 npm run screenshots    # التقاط لقطات حقيقية من اللعبة (بلا متصفح!)
@@ -90,7 +90,7 @@ Nothing to install — just Node 18+.
 
 ### Testing
 ```bash
-npm test               # 48 tests: logic, levels, autopilot, boot-and-play integration
+npm test               # 52 tests: logic, levels, autopilot, boot-and-play integration
 npm run check          # syntax-check every module
 npm run icons          # regenerate PWA icons
 npm run screenshots    # capture real gameplay frames (no browser needed!)

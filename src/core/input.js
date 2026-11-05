@@ -16,6 +16,40 @@ export class Input {
     this.dpad = dpad;
     this.held = new Set();
     this._swipe = null;
+    this._padPrev = {};
+    this._padA = false;
+    this._padStart = false;
+  }
+
+  // Poll the first connected gamepad: d-pad / left stick to hop, A to hop
+  // forward, Start to pause. Edge-triggered, with hold-to-repeat via `held`.
+  pollGamepad() {
+    const pads = navigator.getGamepads?.();
+    if (!pads) return;
+    let pad = null;
+    for (const p of pads) { if (p && p.connected) { pad = p; break; } }
+    if (!pad) return;
+    this.events.emit('gesture', {});
+    const pressed = (i) => !!pad.buttons[i]?.pressed;
+    const ax = pad.axes[0] || 0, ay = pad.axes[1] || 0;
+    const dirs = {
+      up: pressed(12) || ay < -0.5,
+      down: pressed(13) || ay > 0.5,
+      left: pressed(14) || ax < -0.5,
+      right: pressed(15) || ax > 0.5
+    };
+    for (const dir of ['up', 'down', 'left', 'right']) {
+      const now = dirs[dir], was = this._padPrev[dir];
+      if (now && !was) { this.held.delete(dir); this.held.add(dir); this.events.emit('dir', dir); }
+      if (!now && was) this.held.delete(dir);
+      this._padPrev[dir] = now;
+    }
+    const a = pressed(0);
+    if (a && !this._padA) this.events.emit('confirm', {});
+    this._padA = a;
+    const start = pressed(9);
+    if (start && !this._padStart) this.events.emit('pause', {});
+    this._padStart = start;
   }
 
   heldDir() {

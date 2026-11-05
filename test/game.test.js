@@ -113,6 +113,25 @@ test('pause freezes the world', () => {
   assert.ok(g.world.time > t);
 });
 
+test('combo multiplies consecutive homes and resets on death', () => {
+  const g = new Game();
+  g.start();
+  const bonuses = [];
+  g.events.on('home', d => bonuses.push(d.bonus));
+  g.world.timeLeft = 30;
+  homeAt(g, 6);                       // 1st home ×1
+  step(g, SCORED_TIME + DT * 2);
+  g.world.timeLeft = 30;
+  homeAt(g, 9);                       // 2nd home ×2
+  const base = 100 + 30 * 5;
+  assert.equal(bonuses[0], base);
+  assert.equal(bonuses[1], base * 2);
+  assert.equal(g.combo, 2);
+  step(g, SCORED_TIME + DT * 2);   // leave the scored state, respawn
+  g.world.die('water');
+  assert.equal(g.combo, 0);
+});
+
 test('home bonus includes time and fly', () => {
   const g = new Game();
   g.start();

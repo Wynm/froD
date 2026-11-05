@@ -13,16 +13,16 @@ A living plan. Done items are checked; the rest are candidate next steps.
 - [x] Touch (swipe + d-pad), keyboard, haptics
 - [x] Autopilot attract-mode demo + solvability tests
 - [x] PWA offline support + generated icons
-- [x] 48 automated tests incl. boot-and-play integration
+- [x] 52 automated tests incl. boot-and-play integration
 - [x] Headless software rasterizer for real screenshots
 
 ## 🔜 Next candidates
 - [ ] **More lane actors**: snakes that chase on logs, snatching herons, moving lily pads
 - [ ] **Lady-frog escort bonus**: carry a companion home for big points (classic!)
-- [ ] **Combo system**: chain homes without pause for a multiplier
+- [x] **Combo system**: chain homes without a death for up to ×5 points
 - [ ] **Weekly challenge** alongside daily, with a longer horizon leaderboard
 - [ ] **Replay / ghost**: record inputs and race your best daily run
-- [ ] **Gamepad support** (Gamepad API)
+- [x] **Gamepad support** (Gamepad API: d-pad/stick, A, Start)
 - [ ] **Colorblind-friendly palette** option + high-contrast mode
 - [ ] **More music tracks** unlocked by level, with a tiny composer
 - [ ] **Level editor** with shareable seeds/codes

@@ -187,6 +187,9 @@ game.events.on('shieldBreak', ({ x, y }) => {
   fx.shake(2);
   screens.toast(t('toast.shieldBreak'));
 });
+game.events.on('combo', ({ mult }) => {
+  if (mult >= 2) { audio.play('pickup'); buzz(25); screens.toast(t('toast.combo', { n: mult }), { gold: true, ms: 1600 }); }
+});
 game.events.on('extraLife', () => { audio.play('extraLife'); buzz([30, 50, 30]); screens.toast(t('toast.extraLife'), { gold: true }); });
 game.events.on('tick', () => audio.play('tick'));
 game.events.on('crossRoad', () => { meta.bump('roadCrossings'); });
@@ -278,6 +281,7 @@ function render(tSec) {
 
 function frame(now) {
   requestAnimationFrame(frame);
+  input.pollGamepad();
   let dt = (now - last) / 1000;
   last = now;
   if (dt > 0.25) dt = 0.25;
