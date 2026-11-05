@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <title>froD 🐸 — ضفدع يعبر الطريق</title>
+  <meta name="description" content="froD — لعبة أركيد حديثة: ساعد الضفدع على عبور الطريق والنهر. A modern frog-crossing arcade game.">
+  <meta name="theme-color" content="#0c1a10">
+  <link rel="manifest" href="/public/manifest.webmanifest">
+  <link rel="icon" href="/public/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/public/icons/icon-180.png">
+  <link rel="stylesheet" href="/src/ui/style.css">
+</head>
+<body>
+  <div id="app">
+    <header id="hud" class="hud" aria-hidden="true">
+      <div class="hud-row">
+        <div class="hud-cell">
+          <span class="hud-label" data-i18n="hud.score">النقاط</span>
+          <span class="hud-value" id="hud-score">0</span>
+        </div>
+        <div class="hud-cell">
+          <span class="hud-label" data-i18n="hud.best">الأفضل</span>
+          <span class="hud-value" id="hud-best">0</span>
+        </div>
+        <div class="hud-cell">
+          <span class="hud-label" data-i18n="hud.level">المستوى</span>
+          <span class="hud-value" id="hud-level">1</span>
+        </div>
+        <div class="hud-cell hud-lives-cell">
+          <span class="hud-label" data-i18n="hud.lives">الأرواح</span>
+          <span class="hud-value" id="hud-lives"></span>
+        </div>
+        <button id="btn-pause" class="icon-btn" aria-label="Pause">⏸</button>
+      </div>
+      <div class="timebar" role="progressbar" aria-label="time">
+        <div id="timefill"></div>
+      </div>
+    </header>
+
+    <main id="stage">
+      <canvas id="game" width="208" height="208" aria-label="froD game board"></canvas>
+      <div id="screens"></div>
+      <div id="toasts" aria-live="polite"></div>
+    </main>
+
+    <footer id="touchpad" hidden>
+      <div class="dpad" id="dpad">
+        <button class="dpad-btn dpad-up" data-dir="up" aria-label="up">▲</button>
+        <button class="dpad-btn dpad-left" data-dir="left" aria-label="left">◀</button>
+        <button class="dpad-btn dpad-right" data-dir="right" aria-label="right">▶</button>
+        <button class="dpad-btn dpad-down" data-dir="down" aria-label="down">▼</button>
+      </div>
+      <p class="touch-hint" data-i18n="touch.hint">اسحب على الشاشة للقفز</p>
+    </footer>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
