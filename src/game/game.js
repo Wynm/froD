@@ -7,7 +7,7 @@ import {
 import { generateLevel } from './level.js';
 import { World } from './world.js';
 import { Emitter } from '../core/events.js';
-import { hashSeed, todayKey } from '../core/rng.js';
+import { hashSeed, todayKey, mulberry32 } from '../core/rng.js';
 
 export class Game {
   constructor() {
@@ -49,7 +49,9 @@ export class Game {
   }
 
   loadLevel() {
-    this.world = new World(generateLevel(this.level, this.seed));
+    // Seed runtime pickups too: daily retries must match beyond just the lanes.
+    const rng = mulberry32((this.seed ^ Math.imul(this.level, 0x9e3779b9)) >>> 0);
+    this.world = new World(generateLevel(this.level, this.seed), rng);
     this.world.events.on('*', (data, name) => this.onWorld(name, data));
     this.events.emit('level', { level: this.level, theme: this.world.cfg.theme, mode: this.mode });
   }
@@ -106,10 +108,10 @@ export class Game {
       case 'home': {
         this.combo++;
         const mult = Math.min(5, this.combo);   // 1st home ×1, 2nd ×2, … capped ×5
-        const base = SCORE.HOME + Math.ceil(data.timeLeft) * SCORE.TIME_BONUS + (data.fly ? SCORE.FLY : 0);
+        const base = SCORE.HOME + Math.ceil(data.timeLeft) * SCORE.TIME_BONUS + (data.fly ? SCORE.FLY : 0) + (data.escort ? SCORE.ESCORT : 0);
         const bonus = base * mult;
         this.addScore(bonus);
-        this.events.emit('home', { ...data, bonus, mult });
+        this.events.emit('home', { ...data, bonus, mult, escortBonus: data.escort ? SCORE.ESCORT * mult : 0 });
         if (mult >= 2) this.events.emit('combo', { mult, combo: this.combo });
         if (this.world.baysFilled >= this.world.bays.length) {
           this.addScore(SCORE.CLEAR);

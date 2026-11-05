@@ -167,6 +167,88 @@ const MAPS = {
     '................',
     '................'
   ],
+  lady: [
+    '................',
+    '..GGG......GGG..',
+    '.GWWG......GWWG.',
+    '.GWBGGGGGGGGBWG.',
+    '..GGGGGGGGGGGG..',
+    '.GGGLGGGGGGLGGG.',
+    'GGGGLGGGGGGLGGGG',
+    'GG.GGGGGGGGGG.GG',
+    '...GGGGGGGGGG...',
+    '.GGGGGLGGGLGGGG.',
+    'GGG.GGGGGGGG.GGG',
+    'GG...GGGGGG...GG',
+    'GG............GG',
+    '................',
+    '................',
+    '................'
+  ],
+  companion: [
+    '.GG..GG.',
+    'GWWGGWWG',
+    'GGGGGGGG',
+    '.GGLLGG.',
+    'GGGGGGGG',
+    '.GG..GG.',
+    'G......G',
+    '........'
+  ],
+  snake1: [
+    '................',
+    '................',
+    '................',
+    '................',
+    '.....ss.........',
+    '..ssssss..hh....',
+    '.ssYYYYsshhEh...',
+    '..ssssss..hh....',
+    '.....ss.........',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'
+  ],
+  snake2: [
+    '................',
+    '................',
+    '................',
+    '................',
+    '.......ss.......',
+    '..ss..sssshh....',
+    '.ssYYss..hhEh...',
+    '..ss..sssshh....',
+    '.......ss.......',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'
+  ],
+  heron: [
+    '........................',
+    'ww....................ww',
+    'www..................www',
+    'wwww....bbbb........wwww',
+    '.wwww..bbbbbb......wwww.',
+    '..wwwwbbbbbbbb....wwww..',
+    '...wwwbbbbbbbb...www....',
+    '....wwbbbbbbbb..www.....',
+    '.....wbbbbbbbb.www......',
+    '......bbbbbbbbbb........',
+    '.........bbbb...........',
+    '.........bbee...........',
+    '.........bbbooo.........',
+    '..........bb............',
+    '..........ll............',
+    '.........l..l...........'
+  ],
   logTile: [
     '................',
     '................',
@@ -218,7 +300,10 @@ const BASE = {
   car2: '#3aa6a0', car2s: '#2b7d78',
   taxi: '#f2c230', taxis: '#bd941f',
   bus: '#e07b2a', buss: '#ad5c1d',
-  racer: '#d94fa0', racers: '#a83a7a'
+  racer: '#d94fa0', racers: '#a83a7a',
+  lady: '#e879b9', ladyLight: '#ffb3dd', ladyDark: '#b04f8a',
+  snake: '#6b8e23', snakeLight: '#c9d66b', snakeHead: '#8fae3a', snakeEye: '#ff5a5a',
+  heronBody: '#8fa8b8', heronWing: '#d8e8f0', heronEye: '#101418', heronBeak: '#e8a03a', heronLeg: '#c9a86a'
 };
 
 function themePalette(theme) {
@@ -407,6 +492,20 @@ export function bakeSprites(theme = 'day') {
     clock: drawClock(p),
     hedge: drawHedge(p)
   };
+  const ladyColors = { G: p.lady, L: p.ladyLight, W: p.eyeW, B: p.eyeB };
+  sprites.lady = { up: bakeMap(MAPS.lady, ladyColors) };
+  // Tiny bow so the escort reads instantly, even at 16px.
+  const bow = sprites.lady.up.getContext('2d');
+  bow.fillStyle = p.star; bow.fillRect(6, 0, 4, 2); bow.fillRect(7, 1, 2, 2);
+  sprites.companion = bakeMap(MAPS.companion, ladyColors, 8);
+  sprites.snake = [
+    bakeMap(MAPS.snake1, { s: p.snake, Y: p.snakeLight, h: p.snakeHead, E: p.snakeEye }),
+    bakeMap(MAPS.snake2, { s: p.snake, Y: p.snakeLight, h: p.snakeHead, E: p.snakeEye })
+  ];
+  sprites.snakeLeft = sprites.snake.map(flipX);
+  sprites.heron = bakeMap(MAPS.heron, {
+    w: p.heronWing, b: p.heronBody, e: p.heronEye, o: p.heronBeak, l: p.heronLeg
+  }, 24);
   sprites.turtleLeft = {
     up: flipX(sprites.turtle.up),
     warning: flipX(sprites.turtle.warning),

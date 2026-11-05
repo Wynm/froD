@@ -48,3 +48,35 @@ function capture(level, seed, seconds, file) {
 capture(1, 42, 7.3, 'screenshot-day.png');
 capture(2, 7, 6.1, 'screenshot-dusk.png');
 capture(3, 99, 8.2, 'screenshot-night.png');
+
+
+// Composed wildlife showcase: real renderer + real entities, arranged so the
+// three new actors are all visible in one documentation frame.
+function captureWildlife() {
+  const world = new World(generateLevel(4, 7), mulberry32(7));
+  const canvas = new Canvas(208, 208);
+  const renderer = new Renderer(canvas);
+  renderer.setTheme(world.cfg.theme);
+  const fx = new FX();
+  for (let t = 0; t < 4; t += DT) {
+    const dir = decide(world); if (dir) world.hop(dir);
+    world.update(DT);
+    if (world.frog.dead || world.frog.scored) world.respawn();
+  }
+  const visibleLog = (y) => world.lanes[y].items.find(i => i.type === 'log' && i.len >= 3 && i.x > 0 && i.x + i.len < 13);
+  const habitats = [2, 4].map(y => ({ y, log: visibleLog(y) })).filter(h => h.log);
+  world.wildlife.snakes = habitats.map((h, i) => ({
+    laneY: h.y, log: h.log, offset: h.log.len * 0.5,
+    x: h.log.x + h.log.len * 0.5, dir: i ? -1 : 1, mode: 'patrol', phase: i
+  }));
+  const ladyHabitat = [5, 1, 3].map(y => ({ y, log: visibleLog(y) })).find(h => h.log && !habitats.some(s => s.y === h.y));
+  if (ladyHabitat) world.wildlife.lady = { laneY: ladyHabitat.y, log: ladyHabitat.log, offset: ladyHabitat.log.len * 0.5, x: ladyHabitat.log.x + ladyHabitat.log.len * 0.5, ttl: 10 };
+  world.frog.x = 6; world.frog.y = 6; world.frog.ride = null; world.frog.hopping = null;
+  world.wildlife.heron = { x: 6, y: 6, t: 0.8, phase: 'warning' };
+  fx.sparkle(6 * 16 + 8, 6 * 16 + 8); fx.update(0.05);
+  renderer.draw(world, {}, fx, 4.2);
+  const big = scaleUp(canvas, 3);
+  writeFileSync(join(OUT, 'screenshot-wildlife.png'), encodePNG(big.width, big.height, big.data));
+  console.log('wrote screenshot-wildlife.png (wildlife showcase)');
+}
+captureWildlife();

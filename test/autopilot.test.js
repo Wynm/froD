@@ -55,3 +55,12 @@ test('decide never throws and only returns valid directions', () => {
     if (w.frog.dead) w.respawn();
   }
 });
+
+test('bot can clear snake and heron levels (wildlife remains solvable)', () => {
+  let cleared = 0;
+  for (const seed of [1, 7, 42]) if (runBot(3, seed, 240).filled >= 5) cleared++;
+  assert.ok(cleared >= 2, `only ${cleared}/3 snake layouts cleared`);
+  cleared = 0;
+  for (const seed of [1, 42, 2026]) if (runBot(4, seed, 240).filled >= 5) cleared++;
+  assert.ok(cleared >= 2, `only ${cleared}/3 heron layouts cleared`);
+});

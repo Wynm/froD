@@ -1,5 +1,5 @@
 // froD service worker — network-first with offline cache fallback.
-const CACHE = 'frod-v1';
+const CACHE = 'frod-v2';
 const CORE = ['/', '/index.html', '/src/ui/style.css', '/public/manifest.webmanifest', '/public/favicon.svg'];
 
 self.addEventListener('install', (e) => {

@@ -45,6 +45,12 @@ A state machine: `menu → playing ⇄ (dying | scored | clear) → over | daily
 The `Game` owns score/lives/level/mode and re-emits world events. Extra lives are
 granted every 10,000 points (capped at 6). Daily mode ends after 5 levels.
 
+## Wildlife layer (`wildlife.js`)
+A pure simulation layer attached to each world: escort companions ride logs and
+are delivered home for combo-scaled bonuses; snakes patrol/chase on long logs;
+a heron locks a warning shadow before striking. Schedules are seeded and driven
+by `world.time`, independent of input timing, so daily retries stay fair.
+
 ## Presentation
 - **sprites.js** bakes pixel maps + tiny drawing routines into offscreen canvases,
   once per theme. Palettes derive from one base via color mixing.

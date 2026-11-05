@@ -61,3 +61,21 @@ test('every achievement has icon, cond and goal', () => {
     assert.ok(a.icon);
   }
 });
+
+test('old saves migrate wildlife stats and death causes', () => {
+  resetStore();
+  const m = new Meta();
+  // Simulate a v1.0 save missing the new fields.
+  delete m.stats.escorts;
+  delete m.stats.deaths.snake;
+  delete m.stats.deaths.heron;
+  m.save();
+  const m2 = new Meta();
+  assert.equal(m2.stats.escorts, 0);
+  assert.equal(m2.stats.deaths.snake, 0);
+  m2.recordDeath('snake'); m2.recordDeath('heron'); m2.bump('escorts');
+  assert.equal(m2.stats.deaths.snake, 1);
+  assert.equal(m2.stats.deaths.heron, 1);
+  assert.equal(m2.stats.escorts, 1);
+  assert.ok(m2.evaluate().includes('escort_1'));
+});

@@ -1,7 +1,7 @@
 {
   "name": "frod",
-  "version": "1.0.0",
-  "description": "froD — a modern frog-crossing arcade game. Zero dependencies, pure web platform.",
+  "version": "1.1.0",
+  "description": "froD \u2014 a modern frog-crossing arcade game with wildlife escorts, snakes and herons. Zero dependencies.",
   "type": "module",
   "scripts": {
     "start": "node server.mjs",

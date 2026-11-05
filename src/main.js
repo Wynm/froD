@@ -155,13 +155,16 @@ game.events.on('death', ({ cause, x, y }) => {
   else if (cause === 'water') { audio.play('splash'); fx.splash(px(x), px(y)); }
   else if (cause === 'edge') { audio.play('splash'); fx.splash(px(x), px(y)); }
   else if (cause === 'hedge') { audio.play('bonk'); fx.hit(px(x), px(y)); }
+  else if (cause === 'snake') { audio.play('snakeHit'); fx.hit(px(x), px(y)); }
+  else if (cause === 'heron') { audio.play('heronStrike'); fx.burst(px(x), px(y), { colors: ['#d8e8f0', '#8fa8b8'], speed: 45, life: 0.6, gravity: -30 }); }
   else { audio.play('timeDeath'); }
   checkAchievements();
 });
-game.events.on('home', ({ bayX, fly }) => {
+game.events.on('home', ({ bayX, fly, escortBonus }) => {
   audio.play('home');
   buzz([20, 30, 20]);
   if (fly) { audio.play('fly'); meta.bump('flies'); screens.toast(t('toast.fly')); }
+  if (escortBonus) { audio.play('escortHome'); meta.bump('escorts'); screens.toast(t('toast.escortHome', { n: escortBonus }), { gold: true }); }
   meta.bump('homes');
   fx.confetti(px(bayX), px(0));
   checkAchievements();
@@ -187,6 +190,15 @@ game.events.on('shieldBreak', ({ x, y }) => {
   fx.shake(2);
   screens.toast(t('toast.shieldBreak'));
 });
+game.events.on('escortPickup', ({ x, y }) => {
+  audio.play('escortPickup'); buzz([20, 20, 20]);
+  fx.sparkle(px(x), px(y));
+  screens.toast(t('toast.escortPickup'), { gold: true, ms: 2600 });
+});
+game.events.on('escortLost', () => { audio.play('escortLost'); screens.toast(t('toast.escortLost')); });
+game.events.on('snakeAlert', () => { audio.play('snakeAlert'); screens.toast(t('toast.snake'), { ms: 1600 }); });
+game.events.on('heronWarn', () => { audio.play('heronWarn'); buzz([40, 60, 40]); screens.toast(t('toast.heron'), { ms: 1500 }); });
+game.events.on('heronStrike', ({ x, y }) => { audio.play('heronStrike'); fx.shake(2); fx.dust(px(x), px(y)); });
 game.events.on('combo', ({ mult }) => {
   if (mult >= 2) { audio.play('pickup'); buzz(25); screens.toast(t('toast.combo', { n: mult }), { gold: true, ms: 1600 }); }
 });
