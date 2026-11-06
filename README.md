@@ -5,12 +5,14 @@
 **لعبة أركيد حديثة: ساعد الضفدع على عبور الطريق والنهر**
 *A modern frog-crossing arcade game — pure web platform, zero dependencies.*
 
-[![tests](https://img.shields.io/badge/tests-52%20passing-3fae49)](#-الاختبارات--testing)
+[![tests](https://img.shields.io/badge/tests-67%20passing-3fae49)](#-الاختبارات--testing)
 [![deps](https://img.shields.io/badge/dependencies-0-7fd487)](#)
 [![i18n](https://img.shields.io/badge/i18n-العربية%20%7C%20English-ffd23e)](#)
 [![PWA](https://img.shields.io/badge/PWA-offline%20ready-2a6db5)](#)
 
 <img src="docs/screenshot-day.png" width="280" alt="froD daytime gameplay"/> <img src="docs/screenshot-night.png" width="280" alt="froD night gameplay"/>
+
+<img src="docs/screenshot-wildlife.png" width="280" alt="froD wildlife: escort frog, log snake and heron warning"/>
 
 </div>
 
@@ -25,7 +27,7 @@
 - 🎮 **وضعان**: كلاسيكي لا نهائي + **تحدي اليوم** (نفس المسارات لكل اللاعبين، 5 مستويات).
 - 🌗 **4 أوقات للنهار** تتناوب مع المستويات: نهار، غروب، ليل (مع أضواء السيارات واليراعات)، فجر.
 - 🪵 جذوع وسلاحف تغوص، تيار يجرفك، ذباب مكافأة، درع ⭐ وساعة ⏱️.
-- 🏆 أفضل النتائج، **14 إنجازًا**، إحصائيات مفصّلة، أرواح إضافية كل 10000 نقطة.
+- 🏆 أفضل النتائج، **16 إنجازًا**، إحصائيات مفصّلة، أرواح إضافية كل 10000 نقطة.
 - 🌐 **عربي/إنجليزي** مع دعم كامل للاتجاه من اليمين لليسار.
 - 📱 تعمل باللمس (سحب أو أزرار)، وبلوحة المفاتيح، واهتزاز على الجوال.
 - 🤖 **ضفدع آلي** يلعب في الخلفية بالقائمة الرئيسية (ويُثبت أن المستويات قابلة للحل!).
@@ -49,7 +51,7 @@ node server.mjs        # أو: npm start
 
 ### الاختبارات
 ```bash
-npm test               # 52 اختبارًا: المنطق، المستويات، الذكاء الآلي، تكامل التشغيل
+npm test               # 67 اختبارًا: المنطق، المستويات، الذكاء الآلي، تكامل التشغيل
 npm run check          # فحص صياغة كل الوحدات
 npm run icons          # توليد أيقونات PWA
 npm run screenshots    # التقاط لقطات حقيقية من اللعبة (بلا متصفح!)
@@ -66,7 +68,8 @@ npm run screenshots    # التقاط لقطات حقيقية من اللعبة 
 - 🎮 **Two modes**: endless Classic + a **Daily Challenge** (identical lanes for everyone, 5 levels).
 - 🌗 **Four times of day** cycling with levels: day, dusk, night (headlights & fireflies), dawn.
 - 🪵 Logs, diving turtles, a sweeping current, bonus flies, a ⭐ shield and a ⏱️ clock.
-- 🏆 High scores, **14 achievements**, detailed stats, an extra life every 10,000 points.
+- 🐸 **Wildlife**: escort a pink companion home for bonuses; log snakes (level 3+) and a telegraphed heron strike (level 4+).
+- 🏆 High scores, **16 achievements**, detailed stats, an extra life every 10,000 points.
 - 🌐 **Arabic / English** with full RTL support.
 - 📱 Touch (swipe or on-screen pad), keyboard, and mobile haptics.
 - 🤖 An **autopilot frog** plays behind the main menu (and proves levels are solvable!).
@@ -90,7 +93,7 @@ Nothing to install — just Node 18+.
 
 ### Testing
 ```bash
-npm test               # 52 tests: logic, levels, autopilot, boot-and-play integration
+npm test               # 67 tests: logic, levels, autopilot, boot-and-play integration
 npm run check          # syntax-check every module
 npm run icons          # regenerate PWA icons
 npm run screenshots    # capture real gameplay frames (no browser needed!)
@@ -118,7 +121,8 @@ src/
 │   ├── world.js       frog, conveyors, collisions, timer, pickups
 │   ├── game.js        modes, score, lives, level flow (state machine)
 │   ├── meta.js        stats, achievements, high scores
-│   └── autopilot.js   heuristic bot (attract mode + solvability tests)
+│   ├── autopilot.js   heuristic bot (attract mode + solvability tests)
+│   └── wildlife.js    escort frogs, log snakes, telegraphed heron
 ├── render/          # browser canvas
 │   ├── sprites.js     procedural pixel-art, 4 theme palettes
 │   └── renderer.js    world composition, frog animation, lights

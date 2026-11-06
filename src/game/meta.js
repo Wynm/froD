@@ -17,6 +17,8 @@ export const ACHIEVEMENTS = [
   { id: 'daily_done', icon: '📅', cond: s => s.dailiesCompleted >= 1, goal: s => [s.dailiesCompleted, 1] },
   { id: 'flawless', icon: '✨', cond: s => s.flawlessLevels >= 1, goal: s => [s.flawlessLevels, 1] },
   { id: 'road_50', icon: '🛣️', cond: s => s.roadCrossings >= 50, goal: s => [s.roadCrossings, 50] },
+  { id: 'escort_1', icon: '💕', cond: s => (s.escorts || 0) >= 1, goal: s => [s.escorts || 0, 1] },
+  { id: 'escort_5', icon: '🐸', cond: s => (s.escorts || 0) >= 5, goal: s => [s.escorts || 0, 5] },
   { id: 'pickup_10', icon: '🎁', cond: s => s.pickups >= 10, goal: s => [s.pickups, 10] }
 ];
 

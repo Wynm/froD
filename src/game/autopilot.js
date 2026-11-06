@@ -38,7 +38,9 @@ function safeLanding(world, dx, dy, dt) {
   for (const item of lane.items) {
     if (item.type === 'turtles' && !turtleUpAt(world, item, dt)) continue;
     const x = futureX(lane, item, dt);
-    if (tx >= x - SUPPORT_TOL && tx <= x + item.len + SUPPORT_TOL) return true;
+    if (tx >= x - SUPPORT_TOL && tx <= x + item.len + SUPPORT_TOL) {
+      return !world.wildlife?.snakeDanger(tx, ty, dt);
+    }
   }
   return false;
 }
@@ -59,6 +61,9 @@ function inDanger(world) {
   } else if (kind === 'river') {
     if (f.x < 0.9 || f.x > COLS - 1.9) return true; // drifting toward edge
     if (f.ride && f.ride.type === 'turtles' && !turtleUpAt(world, f.ride, 0.5)) return true;
+    if (world.wildlife?.snakeDanger(f.x, f.y, 0.35)) return true;
+    const h = world.wildlife?.heron;
+    if (h?.phase === 'warning' && h.y === f.y && Math.abs(h.x - f.x) < 0.8) return true;
   }
   return false;
 }

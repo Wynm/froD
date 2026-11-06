@@ -143,6 +143,19 @@ export class AudioEngine {
         this.tone({ freq: 120, end: 75, dur: 0.14, type: 'sawtooth', vol: 0.18 });
         this.tone({ freq: 120, end: 70, dur: 0.12, type: 'sawtooth', vol: 0.14, at: 0.17 });
         break;
+      case 'escortPickup': this.arp([659.25, 880, 1174.7], { step: 0.07, dur: 0.16, vol: 0.18 }); break;
+      case 'escortHome': this.arp([523.25, 659.25, 880, 1046.5, 1318.5], { step: 0.08, dur: 0.2, vol: 0.2 }); break;
+      case 'escortLost': this.tone({ freq: 440, end: 220, dur: 0.25, type: 'triangle', vol: 0.16 }); break;
+      case 'snakeAlert': this.noise({ dur: 0.28, vol: 0.12, from: 4500, to: 1800 }); break;
+      case 'snakeHit':
+        this.noise({ dur: 0.2, vol: 0.25, from: 3500, to: 400 });
+        this.tone({ freq: 190, end: 55, dur: 0.25, type: 'sawtooth', vol: 0.2 });
+        break;
+      case 'heronWarn':
+        this.tone({ freq: 880, end: 620, dur: 0.16, type: 'triangle', vol: 0.14 });
+        this.tone({ freq: 880, end: 620, dur: 0.16, type: 'triangle', vol: 0.12, at: 0.22 });
+        break;
+      case 'heronStrike': this.noise({ dur: 0.3, vol: 0.28, from: 2200, to: 250 }); break;
       case 'timeDeath': this.arp([660, 622, 587, 554], { step: 0.1, dur: 0.14, type: 'square', vol: 0.12 }); break;
     }
   }

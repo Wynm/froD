@@ -38,7 +38,9 @@ export class Renderer {
     this.drawVehicles(world, t);
     this.drawPickup(world, t);
     this.drawBayContents(world, t);
+    this.drawWildlife(world, t);
     if (!world.attract) this.drawFrog(world, game, t);
+    this.drawHeron(world, t);
     if (this.theme === 'night' || this.theme === 'dusk') this.drawLights(world, t);
     if (this.theme === 'night') this.drawFireflies(t);
     fx.draw(ctx);
@@ -217,13 +219,89 @@ export class Renderer {
     for (const b of world.bays) {
       const bx = b.x * CELL;
       if (b.filled) {
-        ctx.drawImage(S.frog.up, bx, GOAL_ROW * CELL);
+        if (b.escort) {
+          ctx.drawImage(S.companion, bx, GOAL_ROW * CELL + 4);
+          ctx.drawImage(S.companion, bx + 8, GOAL_ROW * CELL + 4);
+        } else ctx.drawImage(S.frog.up, bx, GOAL_ROW * CELL);
       } else if (b.fly > 0) {
         const bob = Math.round(Math.sin(t * 6 + b.x) * 1);
         const blink = b.fly < 1.5 && Math.sin(t * 12) > 0;
         if (!blink) ctx.drawImage(S.fly[frame], bx + 4, GOAL_ROW * CELL + 4 + bob);
       }
     }
+  }
+
+  // ---- wildlife ---------------------------------------------------------------
+  drawWildlife(world, t) {
+    const wl = world.wildlife;
+    if (!wl) return;
+    const ctx = this.ctx, S = this.sprites;
+    if (wl.lady) {
+      const l = wl.lady;
+      const px = Math.round(l.x * CELL), py = l.laneY * CELL;
+      const blink = l.ttl < 2 && Math.sin(t * 12) > 0;
+      if (!blink) {
+        ctx.drawImage(S.lady.up, px, py);
+        ctx.fillStyle = S.colors.ladyLight;
+        const hy = py - 3 + Math.round(Math.sin(t * 5));
+        ctx.fillRect(px + 6, hy, 2, 1); ctx.fillRect(px + 9, hy, 2, 1);
+        ctx.fillRect(px + 6, hy + 1, 5, 1); ctx.fillRect(px + 7, hy + 2, 3, 1);
+        ctx.fillRect(px + 8, hy + 3, 1, 1);
+      }
+    }
+    const frame = Math.floor(t * 7) % 2;
+    for (const s of wl.snakes) {
+      const px = Math.round(s.x * CELL), py = s.laneY * CELL;
+      if (px < -24 || px > W + 24) continue;
+      const set = s.dir < 0 ? S.snakeLeft : S.snake;
+      ctx.drawImage(set[frame], px, py);
+      if (s.mode === 'chase') {
+        ctx.globalAlpha = 0.35 + 0.2 * Math.sin(t * 14);
+        ctx.fillStyle = S.colors.snakeEye;
+        ctx.fillRect(px + 2, py + 2, 12, 1);
+        ctx.globalAlpha = 1;
+      }
+    }
+    const h = wl.heron;
+    if (h?.phase === 'warning') {
+      const cx = h.x * CELL + 8, cy = h.y * CELL + 8;
+      const p = h.t / 1.35;
+      ctx.globalAlpha = 0.25 + 0.2 * p;
+      ctx.fillStyle = '#000';
+      const r = Math.round(5 + p * 6);
+      ctx.fillRect(Math.round(cx - r), Math.round(cy + 4), r * 2, 3);
+      ctx.globalAlpha = 0.55 + 0.35 * Math.sin(t * 16);
+      ctx.fillStyle = S.colors.taillight;
+      ctx.fillRect(Math.round(cx - 9), Math.round(cy - 9), 4, 1);
+      ctx.fillRect(Math.round(cx - 9), Math.round(cy - 9), 1, 4);
+      ctx.fillRect(Math.round(cx + 5), Math.round(cy - 9), 4, 1);
+      ctx.fillRect(Math.round(cx + 8), Math.round(cy - 9), 1, 4);
+      ctx.fillRect(Math.round(cx - 9), Math.round(cy + 8), 4, 1);
+      ctx.fillRect(Math.round(cx - 9), Math.round(cy + 5), 1, 4);
+      ctx.fillRect(Math.round(cx + 5), Math.round(cy + 8), 4, 1);
+      ctx.fillRect(Math.round(cx + 8), Math.round(cy + 5), 1, 4);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  drawHeron(world, t) {
+    const h = world.wildlife?.heron;
+    if (!h) return;
+    const ctx = this.ctx, S = this.sprites;
+    const cx = h.x * CELL + 8, cy = h.y * CELL + 8;
+    let y = cy - 10, alpha = 1;
+    if (h.phase === 'warning') {
+      const p = h.t / 1.35;
+      y = cy - 12 - (1 - p) * 34;
+      alpha = 0.3 + p * 0.45;
+    } else if (h.phase === 'recover') {
+      y = cy - 10 - h.t * 70;
+      alpha = Math.max(0, 1 - h.t / 0.55);
+    }
+    ctx.globalAlpha = alpha;
+    const flap = Math.round(Math.sin(t * 18) * 2);
+    ctx.drawImage(S.heron, Math.round(cx - 12), Math.round(y - 12 + flap));
+    ctx.globalAlpha = 1;
   }
 
   // ---- frog -------------------------------------------------------------------
@@ -250,6 +328,13 @@ export class Renderer {
         cx += (lane ? lane.dir : 1) * dt * 40;
         alpha = Math.max(0, 1 - dt / 0.9);
         img = S.frog.up;
+      } else if (f.deathCause === 'heron') {
+        cy -= dt * 34;
+        alpha = Math.max(0, 1 - dt / 0.9);
+        img = S.frog.up;
+      } else if (f.deathCause === 'snake') {
+        img = S.splat;
+        alpha = dt > 0.7 ? Math.max(0, 1 - (dt - 0.7) / 0.4) : 1;
       } else if (f.deathCause === 'hedge') {
         cx += Math.sin(dt * 40) * 2 * Math.max(0, 1 - dt);
         img = S.frog.up;
@@ -299,6 +384,13 @@ export class Renderer {
     ctx.drawImage(img, -8, -8);
     ctx.restore();
     ctx.globalAlpha = 1;
+
+    // A rescued companion rides just above the frog, including during hops.
+    if (f.escort) {
+      ctx.drawImage(S.companion, Math.round(cx + 1), Math.round(cy - arc - 12));
+      ctx.fillStyle = S.colors.ladyLight;
+      ctx.fillRect(Math.round(cx - 5), Math.round(cy - arc - 10), 2, 2);
+    }
 
     // shield ring
     if (f.shield) {

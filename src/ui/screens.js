@@ -172,7 +172,7 @@ export class Screens {
   build_howto(panel) {
     this.title(panel, 'howto.title');
     const box = el('div', 'howto');
-    for (const k of ['howto.goal', 'howto.road', 'howto.river', 'howto.bonus', 'howto.time', 'howto.controls', 'howto.extra']) {
+    for (const k of ['howto.goal', 'howto.road', 'howto.river', 'howto.bonus', 'howto.time', 'howto.controls', 'howto.extra', 'howto.wildlife']) {
       box.appendChild(el('p', null, t(k)));
     }
     panel.appendChild(box);
@@ -257,7 +257,8 @@ export class Screens {
       ['stats.homes', s.homes], ['stats.flies', s.flies],
       ['stats.clears', s.clears], ['stats.bestScore', s.bestScore],
       ['stats.bestLevel', s.bestLevel], ['stats.roadCrossings', s.roadCrossings],
-      ['stats.turtleTime', Math.floor(s.turtleTime)], ['stats.playTime', Math.floor(s.playTime / 60)]
+      ['stats.turtleTime', Math.floor(s.turtleTime)], ['stats.escorts', s.escorts || 0],
+      ['stats.playTime', Math.floor(s.playTime / 60)]
     ];
     for (const [k, v] of items) {
       const cell = el('div', 'stat');
@@ -267,7 +268,7 @@ export class Screens {
     }
     panel.appendChild(grid);
     panel.appendChild(el('h2', 'screen-title', t('stats.deaths')));
-    for (const cause of ['car', 'water', 'hedge', 'time', 'edge']) {
+    for (const cause of ['car', 'water', 'hedge', 'time', 'edge', 'snake', 'heron']) {
       const row = el('div', 'death-row');
       row.appendChild(el('span', null, t('over.cause.' + cause)));
       row.appendChild(el('span', null, String(s.deaths[cause] || 0)));
@@ -347,7 +348,7 @@ export class Screens {
       }
     };
     panel.appendChild(reset);
-    panel.appendChild(el('p', 'footer-note version', t('version') + ' 1.0.0'));
+    panel.appendChild(el('p', 'footer-note version', t('version') + ' 1.1.0'));
     this.backBtn(panel);
   }
 }

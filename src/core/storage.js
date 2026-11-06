@@ -30,8 +30,8 @@ export function defaultStore() {
     stats: {
       games: 0, hops: 0, homes: 0, flies: 0, clears: 0,
       bestScore: 0, bestLevel: 0, turtleTime: 0, roadCrossings: 0,
-      dailiesCompleted: 0, flawlessLevels: 0, pickups: 0, playTime: 0,
-      deaths: { car: 0, water: 0, hedge: 0, time: 0, edge: 0 }
+      dailiesCompleted: 0, flawlessLevels: 0, pickups: 0, escorts: 0, playTime: 0,
+      deaths: { car: 0, water: 0, hedge: 0, time: 0, edge: 0, snake: 0, heron: 0 }
     }
   };
 }

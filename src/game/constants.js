@@ -31,7 +31,8 @@ export const SCORE = {
   TIME_BONUS: 5,    // per second remaining
   FLY: 200,
   CLEAR: 1000,
-  PICKUP: 50
+  PICKUP: 50,
+  ESCORT: 200       // delivering a companion safely home
 };
 
 export const THEMES = ['day', 'dusk', 'night', 'dawn'];

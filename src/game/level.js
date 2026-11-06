@@ -1,7 +1,8 @@
 // Procedural level generation. Deterministic for a given (level, seed).
 // Pure module — no DOM. Lanes are looping "conveyors" of items.
 import { COLS, THEMES, timeLimitFor, BAYS_X } from './constants.js';
-import { mulberry32, pick, range } from '../core/rng.js';
+import { mulberry32, pick } from '../core/rng.js';
+import { wildlifeConfig } from './wildlife.js';
 
 const MARGIN = 4;                       // off-screen runway on each side
 const VEHICLE_LENS = { car: 1, taxi: 1, racer: 1, truck: 2, bus: 2 };
@@ -65,6 +66,7 @@ export function generateLevel(level, seed) {
   const dirSeed = Math.floor(rng() * 2);
   const fastLane = Math.floor(rng() * 5);
   const turtleLane = Math.floor(rng() * 5);
+  const wildlife = wildlifeConfig(level, rng);
   const lanes = [{ y: 0, kind: 'goal' }];
   for (let j = 0; j < 5; j++) lanes.push(riverLane(rng, j + 1, j, level, dirSeed, turtleLane));
   lanes.push({ y: 6, kind: 'safe' });
@@ -74,7 +76,8 @@ export function generateLevel(level, seed) {
     level,
     theme: THEMES[(level - 1) % THEMES.length],
     timeLimit: timeLimitFor(level),
-    bays: BAYS_X.map(x => ({ x, filled: false, fly: 0 })),
+    bays: BAYS_X.map(x => ({ x, filled: false, fly: 0, escort: false })),
+    wildlife,
     lanes
   };
 }

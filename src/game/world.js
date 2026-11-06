@@ -5,6 +5,7 @@ import {
   DIRS, rowKind
 } from './constants.js';
 import { Emitter } from '../core/events.js';
+import { Wildlife } from './wildlife.js';
 
 export class World {
   constructor(config, rng = Math.random) {
@@ -21,6 +22,7 @@ export class World {
     this.flyTimer = 2 + rng() * 4;
     this.frog = null;
     this.respawn();
+    this.wildlife = new Wildlife(this);
   }
 
   get baysFilled() { return this.bays.filter(b => b.filled).length; }
@@ -35,8 +37,9 @@ export class World {
       dead: false, deathCause: null, deathT: 0,
       scored: false, shield: false, invuln: 0,
       minY: START_ROW, ride: null, crossedRoad: false,
-      idleT: 0
+      idleT: 0, escort: false
     };
+    this.wildlife?.onRespawn();
   }
 
   // ---- input -------------------------------------------------------------
@@ -97,6 +100,7 @@ export class World {
       this.events.emit('shieldBreak', { x: f.x, y: f.y });
       return;
     }
+    this.wildlife?.loseEscort();
     f.dead = true;
     f.deathCause = cause;
     f.deathT = 0;
@@ -116,10 +120,13 @@ export class World {
       const bay = this.bays.find(b => b.x === f.x && !b.filled);
       if (bay) {
         bay.filled = true;
+        bay.escort = f.escort;
+        const hadEscort = f.escort;
+        f.escort = false;
         const hadFly = bay.fly > 0;
         bay.fly = 0;
         f.scored = true;
-        this.events.emit('home', { bayX: bay.x, fly: hadFly, timeLeft: this.timeLeft });
+        this.events.emit('home', { bayX: bay.x, fly: hadFly, escort: hadEscort, timeLeft: this.timeLeft });
       } else {
         this.die('hedge');
       }
@@ -180,8 +187,8 @@ export class World {
     f.idleT += dt;
     if (f.invuln > 0) f.invuln = Math.max(0, f.invuln - dt);
 
-    if (f.dead) { f.deathT += dt; return; }
-    if (f.scored) return;
+    if (f.dead) { f.deathT += dt; this.wildlife.update(dt); return; }
+    if (f.scored) { this.wildlife.update(dt); return; }
 
     // bonus fly ttl
     for (const b of this.bays) if (b.fly > 0) b.fly = Math.max(0, b.fly - dt);
@@ -220,11 +227,8 @@ export class World {
     if (f.hopping) {
       f.hopping.t += dt / HOP_TIME;
       if (f.hopping.t >= 1) this.land();
-      return;
-    }
-
-    // idle on river: drift with platform, re-check support & edges
-    if (rowKind(f.y) === 'river') {
+    } else if (rowKind(f.y) === 'river') {
+      // idle on river: drift with platform, re-check support & edges
       const lane = this.laneAt(f.y);
       f.x += lane.dir * lane.speed * dt;
       if (f.x < -0.45 || f.x > COLS - 0.55) { this.die('edge'); return; }
@@ -238,5 +242,6 @@ export class World {
     } else if (rowKind(f.y) === 'road') {
       if (this.vehicleHit(this.laneAt(f.y), f.x)) this.die('car');
     }
+    if (!f.dead && !f.scored) this.wildlife.update(dt);
   }
 }
